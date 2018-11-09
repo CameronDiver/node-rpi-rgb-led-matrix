@@ -2,7 +2,7 @@
  *	Copyright 2016, Maxime Journaux <journaux.maxime@gmail.com>
  * 	This work is free. You can redistribute it and/or modify it under the
  *	terms of the Do What The Fuck You Want To Public License, Version 2,
- *	as published by Sam Hocevar. 
+ *	as published by Sam Hocevar.
  *	See http://www.wtfpl.net for more details.
  */
 
@@ -45,16 +45,16 @@ class LedMatrix : public node::ObjectWrap {
 		void SetImage(Image* img);
 		void Draw(int screenx, int screeny, int width, int height, int imgx, int imgy,
 					bool looph, bool loopv);
-		void DrawText(int, int, std::tuple<int, int, int>, const char* text, const char* fontFile); 
+		void DrawText(int, int, std::tuple<int, int, int>, const char* text, const char* fontFile);
 		void DrawCircle(int, int, int, std::tuple<int, int, int>);
-		void DrawLine (int, int, int, int, std::tuple<int, int, int>); 
-		void Brightness (int); 
+		void DrawLine (int, int, int, int, std::tuple<int, int, int>);
+		void Brightness (int);
 
 
 		void Update (void);
 
 	protected:
-		LedMatrix(int rows , int cols , int chained_displays , int parallel_displays, int brightness, const char* mapping);
+		LedMatrix(int rows , int cols , int chained_displays , int parallel_displays, int brightness, const char* mapping, const char* pixelMapping);
 
 		virtual ~LedMatrix();
 

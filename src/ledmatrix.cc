@@ -2,7 +2,7 @@
  *	Copyright 2016, Maxime Journaux <journaux.maxime@gmail.com>
  * 	This work is free. You can redistribute it and/or modify it under the
  *	terms of the Do What The Fuck You Want To Public License, Version 2,
- *	as published by Sam Hocevar. 
+ *	as published by Sam Hocevar.
  *	See http://www.wtfpl.net for more details.
  */
 
@@ -11,7 +11,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
-#include <string> 
+#include <string>
 
 #include <led-matrix.h>
 #include <ledmatrix.h>
@@ -26,18 +26,19 @@ Nan::Persistent<v8::Function> LedMatrix::constructor;
 std::map<std::string, rgb_matrix::Font> LedMatrix::fontMap;
 
 
-LedMatrix::LedMatrix(int rows, int cols , int parallel_displays, int chained_displays, int brightness, const char* mapping) {
+LedMatrix::LedMatrix(int rows, int cols , int parallel_displays, int chained_displays, int brightness, const char* mapping, const char* pixelMapping) {
 
-	RGBMatrix::Options defaults; 
+	RGBMatrix::Options defaults;
 	defaults.rows = rows;
-	defaults.cols = cols; 
+	defaults.cols = cols;
 	defaults.chain_length = chained_displays;
-	defaults.parallel = parallel_displays; 
+	defaults.parallel = parallel_displays;
 	defaults.brightness = brightness;
 	defaults.hardware_mapping = mapping;
+	defaults.pixel_mapper_config = pixelMapping;
 
 	assert(io.Init());
-	matrix = new RGBMatrix(&io, defaults);	
+	matrix = new RGBMatrix(&io, defaults);
 	matrix->set_luminance_correct(true);
 
 	canvas = matrix->CreateFrameCanvas();
@@ -52,9 +53,9 @@ LedMatrix::~LedMatrix() {
 void LedMatrix::Init(v8::Local<v8::Object> exports) {
 
 	Nan::HandleScope scope;
-	
+
 	v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
-	
+
 	tpl->SetClassName(Nan::New("LedMatrix").ToLocalChecked());
 	tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
@@ -71,7 +72,7 @@ void LedMatrix::Init(v8::Local<v8::Object> exports) {
 	Nan::SetPrototypeMethod(tpl, "drawCircle", DrawCircle);
 	Nan::SetPrototypeMethod(tpl, "drawLine", DrawLine);
 	Nan::SetPrototypeMethod(tpl, "brightness", Brightness);
-	
+
 	constructor.Reset(tpl->GetFunction());
 
 	exports->Set(Nan::New("LedMatrix").ToLocalChecked(), tpl->GetFunction());
@@ -138,22 +139,22 @@ void LedMatrix::Draw(int screenx, int screeny, int width, int height, int imgx, 
 			canvas->SetPixel(sx, sy, p.R(), p.G(), p.B());
 		}
 	}
-}	
+}
 
 void LedMatrix :: Update (void)
 {
-	const char* data; 
-	size_t len; 
+	const char* data;
+	size_t len;
 
-	canvas->Serialize(&data, &len); 
+	canvas->Serialize(&data, &len);
 	canvas = matrix->SwapOnVSync(canvas);
 	canvas->Deserialize(data, len);
 }
 
-void LedMatrix :: DrawText (int x, int y, std::tuple<int, int, int> color, const char* text, const char* fontFile) 
+void LedMatrix :: DrawText (int x, int y, std::tuple<int, int, int> color, const char* text, const char* fontFile)
 {
-	const std::string file = fontFile; 
-	auto it = fontMap.find(file); 
+	const std::string file = fontFile;
+	auto it = fontMap.find(file);
 
 	if(it == fontMap.end())
 	{
@@ -161,23 +162,23 @@ void LedMatrix :: DrawText (int x, int y, std::tuple<int, int, int> color, const
 		it = fontMap.find(file);
 		it->second.LoadFont(file.c_str());
 	}
-	
+
 	Color bg(0,0,0);
 	Color fg(std::get<0>(color), std::get<1>(color), std::get<2>(color));
-	rgb_matrix::DrawText(canvas, it->second, x, y + it->second.baseline(), fg, text); 
+	rgb_matrix::DrawText(canvas, it->second, x, y + it->second.baseline(), fg, text);
 }
 
-void LedMatrix :: DrawText (const Nan::FunctionCallbackInfo<Value>& args)  
+void LedMatrix :: DrawText (const Nan::FunctionCallbackInfo<Value>& args)
 {
 	LedMatrix* matrix = ObjectWrap::Unwrap<LedMatrix>(args.Holder());
-	std::string text; 
-	std::string font; 
-	int x = 0; 
-	int y = 0; 
+	std::string text;
+	std::string font;
+	int x = 0;
+	int y = 0;
 
-	int r = 255; 
-	int g = 255; 
-	int b = 255; 
+	int r = 255;
+	int g = 255;
+	int b = 255;
 
 	if(args.Length() > 0 && args[0]->IsNumber())
 	{
@@ -189,16 +190,16 @@ void LedMatrix :: DrawText (const Nan::FunctionCallbackInfo<Value>& args)
 		y = args[1]->ToInteger()->Value();
 	}
 
-	if(args.Length() > 2 && args[2]->IsString()) 
+	if(args.Length() > 2 && args[2]->IsString())
 	{
-		v8::String::Utf8Value str(args[2]->ToString()); 
-		text = std::string(*str); 
+		v8::String::Utf8Value str(args[2]->ToString());
+		text = std::string(*str);
 	}
 
-	if(args.Length() > 3 && args[3]->IsString()) 
+	if(args.Length() > 3 && args[3]->IsString())
 	{
-		v8::String::Utf8Value str(args[3]->ToString()); 
-		font = std::string(*str); 
+		v8::String::Utf8Value str(args[3]->ToString());
+		font = std::string(*str);
 	}
 
 	if(args.Length() > 4 && args[4]->IsNumber())
@@ -217,36 +218,36 @@ void LedMatrix :: DrawText (const Nan::FunctionCallbackInfo<Value>& args)
 	}
 
 
-	
+
 	return matrix->DrawText(x, y, std::make_tuple(r,g,b), text.c_str(), font.c_str());
 }
 
 void LedMatrix :: DrawCircle (int x, int y, int radius, std::tuple<int, int, int> color)
 {
-	Color fg( std::get<0>(color), std::get<1>(color), std::get<2>(color)); 
+	Color fg( std::get<0>(color), std::get<1>(color), std::get<2>(color));
 
 	rgb_matrix::DrawCircle(canvas, x, y, radius, fg);
 }
 
 void LedMatrix :: DrawCircle (const Nan::FunctionCallbackInfo<Value>& args)
 {
-	LedMatrix* matrix = ObjectWrap::Unwrap<LedMatrix>(args.Holder()); 
-	int x = 0; 
-	int y = 0; 
-	int radius = 0; 
+	LedMatrix* matrix = ObjectWrap::Unwrap<LedMatrix>(args.Holder());
+	int x = 0;
+	int y = 0;
+	int radius = 0;
 
-	int r = 255; 
-	int g = 255; 
-	int b = 255; 
+	int r = 255;
+	int g = 255;
+	int b = 255;
 
 	if(args.Length() > 0 && args[0]->IsNumber())
 	{
 		x = args[0]->ToInteger()->Value();
 	}
 
-	if(args.Length() > 1 && args[1]->IsNumber()) 
+	if(args.Length() > 1 && args[1]->IsNumber())
 	{
-		y = args[1]->ToInteger()->Value(); 
+		y = args[1]->ToInteger()->Value();
 	}
 
 	if(args.Length() > 2 && args[2]->IsNumber())
@@ -271,24 +272,24 @@ void LedMatrix :: DrawCircle (const Nan::FunctionCallbackInfo<Value>& args)
 
 	return matrix->DrawCircle( x, y, radius, std::make_tuple(r, g, b));
 }
-	
+
 void LedMatrix :: DrawLine   (int x0, int y0, int x1, int y1, std::tuple<int, int, int> color)
 {
-	Color fg( std::get<0>(color), std::get<1>(color), std::get<2>(color)); 
+	Color fg( std::get<0>(color), std::get<1>(color), std::get<2>(color));
 
 	rgb_matrix::DrawLine(canvas, x0, y0, x1, y1, fg);
 }
 
-void LedMatrix :: DrawLine   (const Nan::FunctionCallbackInfo<Value>& args) 
+void LedMatrix :: DrawLine   (const Nan::FunctionCallbackInfo<Value>& args)
 {
-	LedMatrix* matrix = ObjectWrap::Unwrap<LedMatrix>(args.Holder()); 
-	int x0 = 0; 
-	int y0 = 0; 
-	int x1 = 0; 
-	int y1 = 0; 
-	int r = 0; 
-	int g = 0; 
-	int b = 0; 
+	LedMatrix* matrix = ObjectWrap::Unwrap<LedMatrix>(args.Holder());
+	int x0 = 0;
+	int y0 = 0;
+	int x1 = 0;
+	int y1 = 0;
+	int r = 0;
+	int g = 0;
+	int b = 0;
 
 	if (args.Length() > 0 && args[0]->IsNumber())
 	{
@@ -336,8 +337,8 @@ void LedMatrix :: Brightness (int b)
 
 void LedMatrix :: Brightness (const Nan::FunctionCallbackInfo<Value>& args)
 {
-	LedMatrix* matrix = ObjectWrap::Unwrap<LedMatrix>(args.Holder()); 
-	int b = 100; 
+	LedMatrix* matrix = ObjectWrap::Unwrap<LedMatrix>(args.Holder());
+	int b = 100;
 
 	b = args[0]->ToInteger()->Value();
 
@@ -345,11 +346,11 @@ void LedMatrix :: Brightness (const Nan::FunctionCallbackInfo<Value>& args)
 }
 
 
-	
+
 
 
 void LedMatrix::New(const Nan::FunctionCallbackInfo<Value>& args) {
-	// throw an error if it's not a constructor 
+	// throw an error if it's not a constructor
 	if (!args.IsConstructCall()) {
 		Nan::ThrowError("LedMatrix::must be called as a constructor with 'new' keyword");
 	}
@@ -361,6 +362,7 @@ void LedMatrix::New(const Nan::FunctionCallbackInfo<Value>& args) {
 	int parallel = 1;
 	int brightness = 100;
 	std::string mapping = "regular";
+	std::string pixelMapping = "";
 
 	if(args.Length() > 0 && args[0]->IsNumber()) {
 		rows = args[0]->ToInteger()->Value();
@@ -387,9 +389,14 @@ void LedMatrix::New(const Nan::FunctionCallbackInfo<Value>& args) {
 		mapping = std::string(*str);
 	}
 
+	if(args.Length() > 6 && args[6]->IsString()) {
+		v8::String::Utf8Value str(args[6]->ToString());
+		pixelMapping = std::string(*str);
+	}
+
 	// make the matrix
 
-	LedMatrix* matrix = new LedMatrix(rows, cols, chained, parallel, brightness,  mapping.c_str());
+	LedMatrix* matrix = new LedMatrix(rows, cols, chained, parallel, brightness,  mapping.c_str(), pixelMapping.c_str());
 	matrix->Wrap(args.This());
 
 	// return this object
@@ -613,7 +620,7 @@ void LedMatrix::UV_Scroll(uv_work_t* work) {
 					usleep(uv->speed);
 				}
 				uv->matrix->Clear(uv->startx, uv->starty, uv->width, uv->height);
-				uv->matrix->Draw(uv->startx, uv->starty, uv->width, uv->height, 0, 0, false, true);	
+				uv->matrix->Draw(uv->startx, uv->starty, uv->width, uv->height, 0, 0, false, true);
 			}
 		} else {
 			for(int i = 0; i < uv->matrix->image->GetHeight(); i++) {
