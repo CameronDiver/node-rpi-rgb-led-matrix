@@ -26,7 +26,7 @@ Nan::Persistent<v8::Function> LedMatrix::constructor;
 std::map<std::string, rgb_matrix::Font> LedMatrix::fontMap;
 
 
-LedMatrix::LedMatrix(int rows, int cols , int parallel_displays, int chained_displays, int brightness, const char* mapping, const char* pixelMapping) {
+LedMatrix::LedMatrix(int rows, int cols , int chained_displays, int parallel_displays, int brightness, const char* mapping, const char* pixelMapping) {
 
 	RGBMatrix::Options defaults;
 	defaults.rows = rows;
