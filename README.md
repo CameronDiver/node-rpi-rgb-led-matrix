@@ -1,31 +1,28 @@
-# easybotics-rpi-rgb-led-matrix
+# node-rpi-rgb-led-matrix
 Pilot your rgb led matrix with Nodejs on Raspberry Pi ! Nodejs binding of rpi-rgb-led-matrix library https://github.com/hzeller/rpi-rgb-led-matrix
 
 
-**Fork of: https://github.com/zeitungen/node-rpi-rgb-led-matrix**
-
-**Actively being maintained and modified for: https://github.com/easybotics/node-red-contrib-led-matrix**
+**Fork of: easybotics/node-rpi-rgb-led-matrix 
 
 **It is binding recent version of rpi-rgb-led-matrix library.**
 
-
 ### Installation with npm
 ```
-$ npm i easybotics-rpi-rgb-led-matrix
+$ npm i cd-node-rpi-rgb-led-matrix
 ```
 
 ### Installation with git
 
 ```
-$ git clone --recursive https://github.com/easybotics/node-rpi-rgb-led-matrix.git
-$ cd easybotics-rpi-rgb-led-matrix
+$ git clone --recursive https://github.com/CameronDiver/node-rpi-rgb-led-matrix.git
+$ cd node-rpi-rgb-led-matrix
 $ npm i
 ```
 
 ## Get some Fun
 
 ```js
-var LedMatrix = require("easybotics-rpi-rgb-led-matrix");
+var LedMatrix = require("cd-rpi-rgb-led-matrix");
 
 //init a 16 rows  by 16 cols led matrix
 //default hardware mapping is 'regular', could be 'adafruit-hat-pwm' ect
@@ -41,7 +38,7 @@ The API has changed somewhat since the zeitungen version
 **All operations modify a local frame buffer, only after calling 'Update' are they printed to the display**
 
 * **Constructor: LedMatrix(rows, cols,  chainedDisplays, parallelDisplays, brightness,  hardware-mapping, pixel-mapping)**
-  default values are `rows=32`, `cols=32`,  `chainedDisplays=1`, `parallelDisplay=1`, 'brightness=100', `hardware-mapping=regular`, pixel-mapping=""
+  default values are `rows=32`, `cols=32`,  `chainedDisplays=1`, `parallelDisplay=1`, `brightness=100`, `pixel-mapping=""`, `hardware-mapping=regular`,  `disable_hardware_pulse=false`
 * **getWidth()** return current led matrix width
 * **getHeight()** return current led matrix height
 * **fill(red, green, blue)** fill the led matrix buffer with color specified
