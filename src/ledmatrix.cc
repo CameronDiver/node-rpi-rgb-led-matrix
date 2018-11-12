@@ -26,7 +26,7 @@ Nan::Persistent<v8::Function> LedMatrix::constructor;
 std::map<std::string, rgb_matrix::Font> LedMatrix::fontMap;
 
 
-LedMatrix::LedMatrix(int rows, int cols , int chained_displays, int parallel_displays, int brightness, const char* mapping, const char* pixelMapping) {
+LedMatrix::LedMatrix(int rows, int cols , int chained_displays, int parallel_displays, int brightness, const char* mapping, const char* pixelMapping, bool disable_hardware_pulse) {
 
 	RGBMatrix::Options defaults;
 	defaults.rows = rows;
@@ -36,6 +36,7 @@ LedMatrix::LedMatrix(int rows, int cols , int chained_displays, int parallel_dis
 	defaults.brightness = brightness;
 	defaults.hardware_mapping = mapping;
 	defaults.pixel_mapper_config = pixelMapping;
+	defaults.disable_hardware_pulsing = disable_hardware_pulse;
 
 	assert(io.Init());
 	matrix = new RGBMatrix(&io, defaults);
@@ -363,6 +364,7 @@ void LedMatrix::New(const Nan::FunctionCallbackInfo<Value>& args) {
 	int brightness = 100;
 	std::string mapping = "regular";
 	std::string pixelMapping = "";
+	bool disable_hardware_pulse = false;
 
 	if(args.Length() > 0 && args[0]->IsNumber()) {
 		rows = args[0]->ToInteger()->Value();
@@ -382,7 +384,6 @@ void LedMatrix::New(const Nan::FunctionCallbackInfo<Value>& args) {
 		brightness = args[4]->ToInteger()->Value();
 	}
 
-
 	if(args.Length() > 5 && args[5]->IsString()) {
 
 		v8::String::Utf8Value str(args[5]->ToString());
@@ -394,9 +395,13 @@ void LedMatrix::New(const Nan::FunctionCallbackInfo<Value>& args) {
 		pixelMapping = std::string(*str);
 	}
 
+	if(args.Length() > 7 && args[7]->IsBoolean()) {
+		disable_hardware_pulse = args[7]->ToBoolean()->Value();
+	}
+
 	// make the matrix
 
-	LedMatrix* matrix = new LedMatrix(rows, cols, chained, parallel, brightness,  mapping.c_str(), pixelMapping.c_str());
+	LedMatrix* matrix = new LedMatrix(rows, cols, chained, parallel, brightness,  mapping.c_str(), pixelMapping.c_str(), disable_hardware_pulse);
 	matrix->Wrap(args.This());
 
 	// return this object

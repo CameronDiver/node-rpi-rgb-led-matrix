@@ -54,7 +54,7 @@ class LedMatrix : public node::ObjectWrap {
 		void Update (void);
 
 	protected:
-		LedMatrix(int rows , int cols , int chained_displays , int parallel_displays, int brightness, const char* mapping, const char* pixelMapping);
+		LedMatrix(int rows , int cols , int chained_displays , int parallel_displays, int brightness, const char* mapping, const char* pixelMapping, bool disable_hardware_pulse);
 
 		virtual ~LedMatrix();
 
